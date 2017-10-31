@@ -22,7 +22,7 @@ Ball* ball = new Ball(10.0f);
 
 bool isPlaying = false;
 
-int speedIncrement = 20;
+int speedIncrement = 40;
 int playerScore = 0;
 int enemyScore = 0;
 
@@ -34,8 +34,8 @@ int main()
 	Clock clock;
 	Clock AITimer;
 	const Time AITime = seconds(0.1f);
-	player->speed = 300;
-	enemy->speed = 300;
+	player->speed = 250;
+	enemy->speed = 250;
 	ball->speed = 200;
 
 	Font font;
@@ -63,17 +63,13 @@ int main()
 	enemyScoreText.setFillColor(Color::White);
 	enemyScoreText.setString(to_string(enemyScore));
 
-
-	bool collidePlayerOnce = false;
-	bool collideEnemyOnce = false;
-
 	while (window.isOpen())
 	{
 		if (!isPlaying)
 		{
 			player->paddle.setPosition(10 + player->dimensions.x / 2, gameHeight / 2);
 			enemy->paddle.setPosition(gameWidth - 10 - enemy->dimensions.x / 2, gameHeight / 2);
-			//ball->ball.setPosition(gameWidth / 2, gameHeight / 2);
+			ball->ball.setPosition(gameWidth / 2, gameHeight / 2);
 			ball->ball.setPosition(400, 200);
 			do
 			{
@@ -115,39 +111,14 @@ int main()
 		if(isPlaying)
 		{
 			float deltaTime = clock.restart().asSeconds();
-			if (Keyboard::isKeyPressed(Keyboard::Up) &&
-				(player->paddle.getPosition().y - player->dimensions.y / 2 > 20.f))
-			{
-				player->paddle.move(0.f, -player->speed * deltaTime);
-			}
-			if (Keyboard::isKeyPressed(Keyboard::Down) &&
-				(player->paddle.getPosition().y + player->dimensions.y / 2 < gameHeight - 20.f))
-			{
-				player->paddle.move(0.f, player->speed * deltaTime);
-			}
 
-			if (((enemy->speed < 0.f) && (enemy->paddle.getPosition().y - enemy->dimensions.y / 2 > 20.f)) ||
-				((enemy->speed > 0.f) && (enemy->paddle.getPosition().y + enemy->dimensions.y / 2 < gameHeight - 20.f)))
-			{
-				enemy->paddle.move(0.f, enemy->speed * deltaTime);
-			}
-			
-			if (AITimer.getElapsedTime() > AITime)
-			{
-				AITimer.restart();
-				if (ball->ball.getPosition().y > enemy->paddle.getPosition().y )
-					enemy->speed = 400;
-				else if (ball->ball.getPosition().y < enemy->paddle.getPosition().y  )
-					enemy->speed = -400;
-				else
-					enemy->speed = 0.f;
-			}
+			player->handlePlayerMovement(deltaTime, gameHeight);
+			enemy->handleAIMovement(deltaTime, gameHeight, AITimer, AITime, ball);
+			ball->handleBallMovement(deltaTime);
 
-			float factor = ball->speed * deltaTime;
-			ball->ball.move(std::cos(ball->ballAngle) * factor, std::sin(ball->ballAngle) * factor);
 
 			// Check collisions between the ball and the screen
-			//ball->ball.getGlobalBounds().intersects(player->paddle.getGlobalBounds())
+
 			if (ball->ball.getPosition().x - ball->radius < 0.f)
 			{
 				ball->ball.setPosition(400, 200);
@@ -155,7 +126,7 @@ int main()
 				enemyScoreText.setString(to_string(enemyScore));
 				ball->speed = 200;
 				
-				if (enemyScore > 3)
+				if (enemyScore > 5)
 				{
 					isPlaying = false;
 					pauseMessage.setString("You lost!\nPress space to restart or\nescape to exit");
@@ -170,7 +141,7 @@ int main()
 				playerScore++;
 				enemyScoreText.setString(to_string(playerScore));
 				ball->speed = 200;
-				if (playerScore > 3)
+				if (playerScore > 5)
 				{
 					isPlaying = false;
 					pauseMessage.setString("You won!\nPress space to restart or\nescape to exit");
@@ -217,7 +188,7 @@ int main()
 				ball->speed += speedIncrement;
 			}
 			
-			collideEnemyOnce = false;
+			
 		}
 
 		window.clear();

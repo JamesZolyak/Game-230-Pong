@@ -1,7 +1,7 @@
 #include "Ball.h"
 
 using namespace sf;
-
+using namespace std;
 Ball::Ball(float f)
 {
 	radius = f;
@@ -12,6 +12,11 @@ Ball::Ball(float f)
 	ball.setOrigin(radius / 2, radius / 2);
 }
 
+void Ball::handleBallMovement(float deltaTime)
+{
+	float factor = speed * deltaTime;
+	ball.move(cos(ballAngle) * factor, sin(ballAngle) * factor);
+}
 
 Ball::~Ball()
 {

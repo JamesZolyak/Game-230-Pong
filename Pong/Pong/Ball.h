@@ -6,7 +6,6 @@
 #include <SFML/System.hpp>
 #include <SFML/OpenGL.hpp>
 #include <SFML/Main.hpp>
-#include "Paddle.h"
 
 using namespace sf;
 
@@ -19,6 +18,8 @@ public:
 	float ballAngle;
 	int speed;
 	Ball(float f);
+
+	void handleBallMovement(float deltaTime);
 	~Ball();
 };
 
