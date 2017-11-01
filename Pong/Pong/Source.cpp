@@ -8,6 +8,7 @@
 #include "Paddle.h"
 #include "Ball.h"
 #include <string>
+#include <cmath>
 
 using namespace sf;
 using namespace std;
@@ -63,6 +64,16 @@ int main()
 	enemyScoreText.setFillColor(Color::White);
 	enemyScoreText.setString(to_string(enemyScore));
 
+	SoundBuffer sb;
+	sb.loadFromFile("Bounce.wav");
+	Sound s;
+	s.setBuffer(sb);
+
+	Texture backgroundImage;
+	backgroundImage.loadFromFile("230-PongBackground.png");
+	RectangleShape background;
+	background.setSize(Vector2f(gameWidth, gameHeight));
+	background.setTexture(&backgroundImage);
 	while (window.isOpen())
 	{
 		if (!isPlaying)
@@ -126,7 +137,7 @@ int main()
 				enemyScoreText.setString(to_string(enemyScore));
 				ball->speed = 200;
 				
-				if (enemyScore > 5)
+				if (enemyScore >= 5)
 				{
 					isPlaying = false;
 					pauseMessage.setString("You lost!\nPress space to restart or\nescape to exit");
@@ -139,9 +150,9 @@ int main()
 			{
 				ball->ball.setPosition(400, 200);
 				playerScore++;
-				enemyScoreText.setString(to_string(playerScore));
+				playerScoreText.setString(to_string(playerScore));
 				ball->speed = 200;
-				if (playerScore > 5)
+				if (playerScore >= 5)
 				{
 					isPlaying = false;
 					pauseMessage.setString("You won!\nPress space to restart or\nescape to exit");
@@ -151,26 +162,25 @@ int main()
 			}
 			if (ball->ball.getPosition().y - ball->radius < 0.f)
 			{
-				//ballSound.play();
+				s.play();
 				ball->ballAngle = -ball->ballAngle;
 				ball->ball.setPosition(ball->ball.getPosition().x, ball->radius + 0.1f);
 			}
 			if (ball->ball.getPosition().y + ball->radius > gameHeight)
 			{
-				//ballSound.play();
+				s.play();
 				ball->ballAngle = -ball->ballAngle;
 				ball->ball.setPosition(ball->ball.getPosition().x, gameHeight - ball->radius - 0.1f);
 			}
 			
-					
 			if (ball->ball.getGlobalBounds().intersects(player->paddle.getGlobalBounds()))
 			{
-				if (ball->ball.getOrigin().y > player->paddle.getOrigin().y)
-					ball->ballAngle = pi - ball->ballAngle + (std::rand() % 20) * pi / 100;
-				else
-					ball->ballAngle = pi - ball->ballAngle - (std::rand() % 20) * pi / 100;
 				
-				//ballSound.play();
+				Vector2f temp = ball->ball.getPosition() - player->paddle.getPosition();
+				float angle = atan2f(temp.y, temp.x) * 0.95;
+				ball->ballAngle = angle;
+
+				s.play();
 				ball->ball.setPosition(player->paddle.getPosition().x + ball->radius + player->dimensions.x / 2 + 20.0f, ball->ball.getPosition().y);
 				ball->speed += speedIncrement;
 			}
@@ -178,12 +188,12 @@ int main()
 			
 			if (ball->ball.getGlobalBounds().intersects(enemy->paddle.getGlobalBounds()))
 			{
-				if (ball->ball.getOrigin().y > enemy->paddle.getOrigin().y)
-					ball->ballAngle = pi - ball->ballAngle + (std::rand() % 20) * pi / 100;
-				else
-					ball->ballAngle = pi - ball->ballAngle - (std::rand() % 20) * pi / 100;
 
-				//ballSound.play();
+				Vector2f temp = ball->ball.getPosition() - enemy->paddle.getPosition();
+				float angle = atan2f(temp.y, temp.x) * 0.95;
+				ball->ballAngle = angle;
+
+				s.play();
 				ball->ball.setPosition(enemy->paddle.getPosition().x - ball->radius - enemy->dimensions.x / 2 - 20.0f, ball->ball.getPosition().y);
 				ball->speed += speedIncrement;
 			}
@@ -192,9 +202,11 @@ int main()
 		}
 
 		window.clear();
+		window.draw(background);
 		if (isPlaying)
 		{
 			// Draw the paddles and the ball
+			
 			window.draw(playerScoreText);
 			window.draw(enemyScoreText);
 			window.draw(player->paddle);
