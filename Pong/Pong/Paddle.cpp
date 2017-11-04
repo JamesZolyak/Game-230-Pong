@@ -25,6 +25,20 @@ void Paddle::handlePlayerMovement(float deltaTime, int gameHeight)
 	}
 }
 
+void Paddle::handleSecondPlayerMovement(float deltaTime, int gameHeight)
+{
+	if (Keyboard::isKeyPressed(Keyboard::W) &&
+		(paddle.getPosition().y - dimensions.y / 2 > 20.f))
+	{
+		paddle.move(0.f, -speed * deltaTime);
+	}
+	if (Keyboard::isKeyPressed(Keyboard::S) &&
+		(paddle.getPosition().y + dimensions.y / 2 < gameHeight - 20.f))
+	{
+		paddle.move(0.f, speed * deltaTime);
+	}
+}
+
 void Paddle::handleAIMovement(float deltaTime, int gameHeight, Clock AITimer, Time AITime, Ball* ball)
 {
 	if (((speed < 0.f) && (paddle.getPosition().y - dimensions.y / 2 > 20.f)) ||

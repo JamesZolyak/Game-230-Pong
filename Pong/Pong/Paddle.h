@@ -20,6 +20,7 @@ public:
 
 	Paddle(Vector2f dimensions);
 	void handlePlayerMovement(float deltaTime, int gameHeight);
+	void handleSecondPlayerMovement(float deltaTime, int gameHeight);
 	void handleAIMovement(float deltaTime, int gameHeight, Clock AITimer, Time AITime, Ball* ball);
 	~Paddle();
 };

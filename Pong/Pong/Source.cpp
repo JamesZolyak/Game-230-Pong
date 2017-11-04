@@ -27,6 +27,8 @@ int speedIncrement = 40;
 int playerScore = 0;
 int enemyScore = 0;
 
+bool isSinglePlayer = true;
+
 int main()
 {
 	std::srand(static_cast<unsigned int>(std::time(NULL)));
@@ -48,7 +50,7 @@ int main()
 	pauseMessage.setCharacterSize(40);
 	pauseMessage.setPosition(170.f, 150.f);
 	pauseMessage.setFillColor(Color::White);
-	pauseMessage.setString("Welcome to SFML pong!\nPress space to start the game");
+	pauseMessage.setString("Welcome to SFML pong!\nPress 1 for single player\nPress 2 for multiplayer");
 
 	Text playerScoreText;
 	playerScoreText.setFont(font);
@@ -96,8 +98,32 @@ int main()
 			if (event.type == Event::Closed)
 				window.close();
 
-			if ((event.type == Event::KeyPressed) && (event.key.code == sf::Keyboard::Space))
+			if ((event.type == Event::KeyPressed) && (event.key.code == sf::Keyboard::Num1))
 			{
+
+				isSinglePlayer = true;
+				if (!isPlaying)
+				{
+					// (re)start the game
+					isPlaying = true;
+					clock.restart();
+
+					// Reset the position of the paddles and ball
+					player->paddle.setPosition(10 + player->dimensions.x / 2, gameHeight / 2);
+					enemy->paddle.setPosition(gameWidth - 10 - enemy->dimensions.x / 2, gameHeight / 2);
+					ball->ball.setPosition(gameWidth / 2, gameHeight / 2);
+
+					// Reset the ball angle
+					do
+					{
+						// Make sure the ball initial angle is not too much vertical
+						ball->ballAngle = (std::rand() % 360) * 2 * pi / 360;
+					} while (std::abs(std::cos(ball->ballAngle)) < 0.7f);
+				}
+			}
+			if ((event.type == Event::KeyPressed) && (event.key.code == sf::Keyboard::Num2))
+			{
+				isSinglePlayer = false;
 				if (!isPlaying)
 				{
 					// (re)start the game
@@ -124,7 +150,14 @@ int main()
 			float deltaTime = clock.restart().asSeconds();
 
 			player->handlePlayerMovement(deltaTime, gameHeight);
-			enemy->handleAIMovement(deltaTime, gameHeight, AITimer, AITime, ball);
+			if (isSinglePlayer)
+			{
+				enemy->handleAIMovement(deltaTime, gameHeight, AITimer, AITime, ball);
+			}
+			else
+			{
+				enemy->handleSecondPlayerMovement(deltaTime, gameHeight);
+			}
 			ball->handleBallMovement(deltaTime);
 
 
