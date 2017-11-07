@@ -40,23 +40,23 @@ bool Ball::handlePlayerScoreCollision(int gameWidth)
 	return false;
 }
 
-void Ball::handleWallCollision(Sound s, int gameHeight)
+void Ball::handleWallCollision(Sound* s, int gameHeight)
 {
 	if (ball.getPosition().y - radius < 0.f)
 	{
-		s.play();
+		s->play();
 		ballAngle = -ballAngle;
 		ball.setPosition(ball.getPosition().x, radius + 0.1f);
 	}
 	if (ball.getPosition().y + radius > gameHeight)
 	{
-		s.play();
+		s->play();
 		ballAngle = -ballAngle;
 		ball.setPosition(ball.getPosition().x, gameHeight - radius - 0.1f);
 	}
 }
 
-void Ball::handlePaddleCollision(Sound s, Paddle player, Paddle enemy)
+void Ball::handlePaddleCollision(Sound* s, Paddle player, Paddle enemy)
 {
 	if (ball.getGlobalBounds().intersects(player.paddle.getGlobalBounds()))
 	{
@@ -64,7 +64,7 @@ void Ball::handlePaddleCollision(Sound s, Paddle player, Paddle enemy)
 		float angle = atan2f(temp.y, temp.x) * 0.95;
 		ballAngle = angle;
 
-		s.play();
+		s->play();
 		ball.setPosition(player.paddle.getPosition().x + radius + player.dimensions.x / 2 + 20.0f, ball.getPosition().y);
 		speed += 40;
 	}
@@ -75,7 +75,7 @@ void Ball::handlePaddleCollision(Sound s, Paddle player, Paddle enemy)
 		float angle = atan2f(temp.y, temp.x) * 0.95;
 		ballAngle = angle;
 
-		s.play();
+		s->play();
 		ball.setPosition(enemy.paddle.getPosition().x - radius - enemy.dimensions.x / 2 - 20.0f, ball.getPosition().y);
 		speed += 40;
 	}

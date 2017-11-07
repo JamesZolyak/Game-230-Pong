@@ -23,8 +23,8 @@ public:
 	void handleBallMovement(float deltaTime);
 	bool handleEnemyScoreCollision();
 	bool handlePlayerScoreCollision(int gameWidth);
-	void handleWallCollision(Sound s, int gameHeight);
-	void handlePaddleCollision(Sound s, Paddle player, Paddle enemy);
+	void handleWallCollision(Sound* s, int gameHeight);
+	void handlePaddleCollision(Sound* s, Paddle player, Paddle enemy);
 	~Ball();
 };
 

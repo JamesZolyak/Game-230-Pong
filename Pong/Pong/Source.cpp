@@ -181,8 +181,8 @@ int main()
 					enemyScore = 0;
 				}
 			}
-			ball->handleWallCollision(s, gameHeight);
-			ball->handlePaddleCollision(s, *player, *enemy);
+			ball->handleWallCollision(&s, gameHeight);
+			ball->handlePaddleCollision(&s, *player, *enemy);
 
 			if (playerScore == 4 && enemyScore == 4)
 			{
@@ -213,8 +213,8 @@ int main()
 						enemyScore = 0;
 					}
 				}
-				spareBall->handleWallCollision(s, gameHeight);
-				spareBall->handlePaddleCollision(s, *player, *enemy);
+				spareBall->handleWallCollision(&s, gameHeight);
+				spareBall->handlePaddleCollision(&s, *player, *enemy);
 			}
 		}
 
