@@ -6,6 +6,7 @@
 #include <SFML/System.hpp>
 #include <SFML/OpenGL.hpp>
 #include <SFML/Main.hpp>
+#include "Paddle.h"
 
 using namespace sf;
 
@@ -20,6 +21,10 @@ public:
 	Ball(float f);
 
 	void handleBallMovement(float deltaTime);
+	bool handleEnemyScoreCollision();
+	bool handlePlayerScoreCollision(int gameWidth);
+	void handleWallCollision(Sound s, int gameHeight);
+	void handlePaddleCollision(Sound s, Paddle player, Paddle enemy);
 	~Ball();
 };
 

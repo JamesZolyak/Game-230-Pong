@@ -20,7 +20,7 @@ const int gameHeight = 600;
 Paddle* player = new Paddle(Vector2f(25, 100));
 Paddle* enemy = new Paddle(Vector2f(25, 100));
 Ball* ball = new Ball(10.0f);
-
+Ball* spareBall = new Ball(10.0f);
 bool isPlaying = false;
 
 int speedIncrement = 40;
@@ -40,6 +40,7 @@ int main()
 	player->speed = 250;
 	enemy->speed = 250;
 	ball->speed = 200;
+	spareBall->speed = 200;
 
 	Font font;
 	if (!font.loadFromFile("calibri.ttf"))
@@ -54,14 +55,14 @@ int main()
 
 	Text playerScoreText;
 	playerScoreText.setFont(font);
-	playerScoreText.setCharacterSize(20);
+	playerScoreText.setCharacterSize(40);
 	playerScoreText.setPosition(80.f, 80.f);
 	playerScoreText.setFillColor(Color::White);
 	playerScoreText.setString(to_string(playerScore));
 
 	Text enemyScoreText;
 	enemyScoreText.setFont(font);
-	enemyScoreText.setCharacterSize(20);
+	enemyScoreText.setCharacterSize(40);
 	enemyScoreText.setPosition(700.f, 80.f);
 	enemyScoreText.setFillColor(Color::White);
 	enemyScoreText.setString(to_string(enemyScore));
@@ -83,11 +84,13 @@ int main()
 			player->paddle.setPosition(10 + player->dimensions.x / 2, gameHeight / 2);
 			enemy->paddle.setPosition(gameWidth - 10 - enemy->dimensions.x / 2, gameHeight / 2);
 			ball->ball.setPosition(gameWidth / 2, gameHeight / 2);
-			ball->ball.setPosition(400, 200);
+			//ball->ball.setPosition(400, 200);
+			spareBall->ball.setPosition(gameWidth / 2, gameHeight / 2);
 			do
 			{
 				// Make sure the ball initial angle is not too much vertical
 				ball->ballAngle = (std::rand() % 360) * 2 * pi / 360;
+				spareBall->ballAngle = (std::rand() % 360) * 2 * pi / 360;
 			} while (std::abs(std::cos(ball->ballAngle)) < 0.7f);
 			
 		}
@@ -95,7 +98,7 @@ int main()
 		Event event;
 		while (window.pollEvent(event))
 		{
-			if (event.type == Event::Closed)
+			if (event.type == Event::Closed || (event.type == Event::KeyPressed) && (event.key.code == sf::Keyboard::Escape))
 				window.close();
 
 			if ((event.type == Event::KeyPressed) && (event.key.code == sf::Keyboard::Num1))
@@ -104,21 +107,17 @@ int main()
 				isSinglePlayer = true;
 				if (!isPlaying)
 				{
-					// (re)start the game
 					isPlaying = true;
 					clock.restart();
 
-					// Reset the position of the paddles and ball
 					player->paddle.setPosition(10 + player->dimensions.x / 2, gameHeight / 2);
 					enemy->paddle.setPosition(gameWidth - 10 - enemy->dimensions.x / 2, gameHeight / 2);
 					ball->ball.setPosition(gameWidth / 2, gameHeight / 2);
 
-					// Reset the ball angle
 					do
 					{
-						// Make sure the ball initial angle is not too much vertical
-						ball->ballAngle = (std::rand() % 360) * 2 * pi / 360;
-					} while (std::abs(std::cos(ball->ballAngle)) < 0.7f);
+						ball->ballAngle = (rand() % 360) * 2 * pi / 360;
+					} while (abs(cos(ball->ballAngle)) < 0.7f);
 				}
 			}
 			if ((event.type == Event::KeyPressed) && (event.key.code == sf::Keyboard::Num2))
@@ -126,19 +125,15 @@ int main()
 				isSinglePlayer = false;
 				if (!isPlaying)
 				{
-					// (re)start the game
 					isPlaying = true;
 					clock.restart();
 
-					// Reset the position of the paddles and ball
 					player->paddle.setPosition(10 + player->dimensions.x / 2, gameHeight / 2);
 					enemy->paddle.setPosition(gameWidth - 10 - enemy->dimensions.x / 2, gameHeight / 2);
 					ball->ball.setPosition(gameWidth / 2, gameHeight / 2);
 
-					// Reset the ball angle
 					do
 					{
-						// Make sure the ball initial angle is not too much vertical
 						ball->ballAngle = (std::rand() % 360) * 2 * pi / 360;
 					} while (std::abs(std::cos(ball->ballAngle)) < 0.7f);
 				}
@@ -152,86 +147,75 @@ int main()
 			player->handlePlayerMovement(deltaTime, gameHeight);
 			if (isSinglePlayer)
 			{
-				enemy->handleAIMovement(deltaTime, gameHeight, AITimer, AITime, ball);
+				enemy->handleAIMovement(deltaTime, gameHeight, AITimer, AITime, ball->ball.getPosition().y);
 			}
 			else
 			{
 				enemy->handleSecondPlayerMovement(deltaTime, gameHeight);
 			}
 			ball->handleBallMovement(deltaTime);
-
-
-			// Check collisions between the ball and the screen
-
-			if (ball->ball.getPosition().x - ball->radius < 0.f)
+			
+			if (ball->handleEnemyScoreCollision())
 			{
-				ball->ball.setPosition(400, 200);
 				enemyScore++;
 				enemyScoreText.setString(to_string(enemyScore));
-				ball->speed = 200;
 				
 				if (enemyScore >= 5)
 				{
 					isPlaying = false;
-					pauseMessage.setString("You lost!\nPress space to restart or\nescape to exit");
+					pauseMessage.setString("You lost!\nPress escape to exit");
 					playerScore = 0;
 					enemyScore = 0;
 				}
 				
 			}
-			if (ball->ball.getPosition().x + ball->radius > gameWidth)
+			if (ball->handlePlayerScoreCollision(gameWidth))
 			{
-				ball->ball.setPosition(400, 200);
 				playerScore++;
 				playerScoreText.setString(to_string(playerScore));
-				ball->speed = 200;
 				if (playerScore >= 5)
 				{
 					isPlaying = false;
-					pauseMessage.setString("You won!\nPress space to restart or\nescape to exit");
+					pauseMessage.setString("You won!\nPress escape to exit");
 					playerScore = 0;
 					enemyScore = 0;
 				}
 			}
-			if (ball->ball.getPosition().y - ball->radius < 0.f)
-			{
-				s.play();
-				ball->ballAngle = -ball->ballAngle;
-				ball->ball.setPosition(ball->ball.getPosition().x, ball->radius + 0.1f);
-			}
-			if (ball->ball.getPosition().y + ball->radius > gameHeight)
-			{
-				s.play();
-				ball->ballAngle = -ball->ballAngle;
-				ball->ball.setPosition(ball->ball.getPosition().x, gameHeight - ball->radius - 0.1f);
-			}
-			
-			if (ball->ball.getGlobalBounds().intersects(player->paddle.getGlobalBounds()))
-			{
-				
-				Vector2f temp = ball->ball.getPosition() - player->paddle.getPosition();
-				float angle = atan2f(temp.y, temp.x) * 0.95;
-				ball->ballAngle = angle;
+			ball->handleWallCollision(s, gameHeight);
+			ball->handlePaddleCollision(s, *player, *enemy);
 
-				s.play();
-				ball->ball.setPosition(player->paddle.getPosition().x + ball->radius + player->dimensions.x / 2 + 20.0f, ball->ball.getPosition().y);
-				ball->speed += speedIncrement;
-			}
-		
-			
-			if (ball->ball.getGlobalBounds().intersects(enemy->paddle.getGlobalBounds()))
+			if (playerScore == 4 && enemyScore == 4)
 			{
+				spareBall->handleBallMovement(deltaTime);
+				if (spareBall->handleEnemyScoreCollision())
+				{
+					enemyScore++;
+					enemyScoreText.setString(to_string(enemyScore));
 
-				Vector2f temp = ball->ball.getPosition() - enemy->paddle.getPosition();
-				float angle = atan2f(temp.y, temp.x) * 0.95;
-				ball->ballAngle = angle;
+					if (enemyScore >= 5)
+					{
+						isPlaying = false;
+						pauseMessage.setString("You lost!\nPress space to restart or\nescape to exit");
+						playerScore = 0;
+						enemyScore = 0;
+					}
 
-				s.play();
-				ball->ball.setPosition(enemy->paddle.getPosition().x - ball->radius - enemy->dimensions.x / 2 - 20.0f, ball->ball.getPosition().y);
-				ball->speed += speedIncrement;
+				}
+				if (spareBall->handlePlayerScoreCollision(gameWidth))
+				{
+					playerScore++;
+					playerScoreText.setString(to_string(playerScore));
+					if (playerScore >= 5)
+					{
+						isPlaying = false;
+						pauseMessage.setString("You won!\nPress space to restart or\nescape to exit");
+						playerScore = 0;
+						enemyScore = 0;
+					}
+				}
+				spareBall->handleWallCollision(s, gameHeight);
+				spareBall->handlePaddleCollision(s, *player, *enemy);
 			}
-			
-			
 		}
 
 		window.clear();
@@ -245,7 +229,10 @@ int main()
 			window.draw(player->paddle);
 			window.draw(enemy->paddle);
 			window.draw(ball->ball);
-			
+			if ((playerScore == 4 && enemyScore == 4) && !isSinglePlayer)
+			{
+				window.draw(spareBall->ball);
+			}
 
 		}
 

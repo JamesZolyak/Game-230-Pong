@@ -6,7 +6,6 @@
 #include <SFML/System.hpp>
 #include <SFML/OpenGL.hpp>
 #include <SFML/Main.hpp>
-#include "Ball.h"
 
 using namespace sf;
 
@@ -21,7 +20,7 @@ public:
 	Paddle(Vector2f dimensions);
 	void handlePlayerMovement(float deltaTime, int gameHeight);
 	void handleSecondPlayerMovement(float deltaTime, int gameHeight);
-	void handleAIMovement(float deltaTime, int gameHeight, Clock AITimer, Time AITime, Ball* ball);
+	void handleAIMovement(float deltaTime, int gameHeight, Clock AITimer, Time AITime, float ballYPosition);
 	~Paddle();
 };
 

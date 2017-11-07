@@ -13,20 +13,6 @@ Paddle::Paddle(Vector2f dimensions)
 
 void Paddle::handlePlayerMovement(float deltaTime, int gameHeight)
 {
-	if (Keyboard::isKeyPressed(Keyboard::Up) &&
-		(paddle.getPosition().y - dimensions.y / 2 > 20.f))
-	{
-		paddle.move(0.f, -speed * deltaTime);
-	}
-	if (Keyboard::isKeyPressed(Keyboard::Down) &&
-		(paddle.getPosition().y + dimensions.y / 2 < gameHeight - 20.f))
-	{
-		paddle.move(0.f, speed * deltaTime);
-	}
-}
-
-void Paddle::handleSecondPlayerMovement(float deltaTime, int gameHeight)
-{
 	if (Keyboard::isKeyPressed(Keyboard::W) &&
 		(paddle.getPosition().y - dimensions.y / 2 > 20.f))
 	{
@@ -39,7 +25,21 @@ void Paddle::handleSecondPlayerMovement(float deltaTime, int gameHeight)
 	}
 }
 
-void Paddle::handleAIMovement(float deltaTime, int gameHeight, Clock AITimer, Time AITime, Ball* ball)
+void Paddle::handleSecondPlayerMovement(float deltaTime, int gameHeight)
+{
+	if (Keyboard::isKeyPressed(Keyboard::Up) &&
+		(paddle.getPosition().y - dimensions.y / 2 > 20.f))
+	{
+		paddle.move(0.f, -speed * deltaTime);
+	}
+	if (Keyboard::isKeyPressed(Keyboard::Down) &&
+		(paddle.getPosition().y + dimensions.y / 2 < gameHeight - 20.f))
+	{
+		paddle.move(0.f, speed * deltaTime);
+	}
+}
+
+void Paddle::handleAIMovement(float deltaTime, int gameHeight, Clock AITimer, Time AITime, float ballYPosition)
 {
 	if (((speed < 0.f) && (paddle.getPosition().y - dimensions.y / 2 > 20.f)) ||
 		((speed > 0.f) && (paddle.getPosition().y + dimensions.y / 2 < gameHeight - 20.f)))
@@ -50,9 +50,9 @@ void Paddle::handleAIMovement(float deltaTime, int gameHeight, Clock AITimer, Ti
 	if (AITimer.getElapsedTime() > AITime)
 	{
 		AITimer.restart();
-		if (ball->ball.getPosition().y > paddle.getPosition().y + dimensions.y)
+		if (ballYPosition > paddle.getPosition().y + dimensions.y)
 			speed = 250;
-		else if (ball->ball.getPosition().y < paddle.getPosition().y - dimensions.y)
+		else if (ballYPosition < paddle.getPosition().y - dimensions.y)
 			speed = -250;
 		else
 			speed = 0.f;
